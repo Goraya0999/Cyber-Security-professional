@@ -74,8 +74,8 @@ I am a Software Engineering student focused on:
 
 ## 🌐 Connect With Me
 
-* GitHub: (your profile link)
-* LinkedIn: (add later)
+* GitHub: https://github.com/Goraya0999
+* LinkedIn: 
 
 ---
 
