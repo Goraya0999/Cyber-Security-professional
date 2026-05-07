@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-luxury-gold: #D4AF37;
+  --color-luxury-silver: #C0C0C0;
+  --color-cyber-blue: #00f2ff;
+  --color-cyber-purple: #bc13fe;
+  --color-obsidian: #020305;
+  --color-onyx: #0A0B0D;
+}
+
+@layer base {
+  body {
+    @apply bg-obsidian text-slate-300 font-sans selection:bg-cyber-blue/30 selection:text-cyber-blue scroll-smooth;
+    overflow-x: hidden;
+  }
+
+  * {
+    @apply border-white/5;
+  }
+}
+
+@utility glass-luxury {
+  @apply bg-white/[0.03] backdrop-blur-2xl border border-white/10 shadow-2xl;
+}
+
+@utility glass-card {
+  @apply bg-gradient-to-br from-white/[0.05] to-transparent backdrop-blur-xl border border-white/[0.08] shadow-2xl;
+}
+
+@utility text-gradient-premium {
+  @apply bg-gradient-to-br from-white via-white to-slate-500 bg-clip-text text-transparent;
+}
+
+@utility text-gradient-cyber {
+  @apply bg-gradient-to-r from-cyber-blue to-cyber-purple bg-clip-text text-transparent;
+}
+
+@utility animate-glow {
+  animation: glow 4s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 20px -10px rgba(0, 242, 255, 0.2); }
+  to { box-shadow: 0 0 40px -5px rgba(188, 19, 254, 0.3); }
+}
+
+@utility custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+  }
+}
