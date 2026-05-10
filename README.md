@@ -1,82 +1,159 @@
-# 🚀 Cyber Security & AI API Development Journey
+# 🐞 Bug Bounty Roadmap
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Focus-CyberSecurity%20%7C%20AI-blue?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/Status-Active%20Learning-success?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/Consistency-Daily-orange?style=for-the-badge"/>
-</p>
+A complete self-study roadmap for learning Bug Bounty Hunting, Web Security, and Ethical Hacking from beginner to advanced level.
 
 ---
 
-## 👨‍💻 About Me
+# 📌 Goal
 
-I am a Software Engineering student focused on:
-
-* 🔐 Cyber Security (Ethical Hacking, Tools, Attacks & Defense)
-* 🤖 AI + API Development (FastAPI, ML APIs, Automation)
-
-📍 Goal: Become a **Security Engineer + Backend Developer**
-
----
-
-## 🧠 What This Repo Shows
-
-✔ Real Projects (Not just tutorials)
-✔ Notes in simple language
-✔ Hands-on tools usage
-✔ API building & testing (Postman)
+Learn how to:
+- Find web vulnerabilities
+- Perform reconnaissance
+- Understand web technologies
+- Practice legal ethical hacking
+- Write professional bug reports
+- Participate in bug bounty programs
 
 ---
 
-## 🛠️ Tech Stack
+# 🛠️ Skills Covered
 
-**Languages & Tools:**
+## Phase 1 — Basics
+- Linux Fundamentals
+- Networking Basics
+- HTTP/HTTPS
+- DNS
+- Command Line Usage
+- Git & GitHub
 
-* Python 🐍
-* FastAPI ⚡
-* Linux 🐧
-* Git & GitHub
-* Networking Fundamentals
+## Phase 2 — Web Fundamentals
+- HTML
+- CSS
+- JavaScript Basics
+- Cookies & Sessions
+- APIs
+- Authentication & Authorization
+
+## Phase 3 — Security Fundamentals
+- OWASP Top 10
+- Common Vulnerabilities
+- Security Misconfigurations
+- Input Validation
+- Access Control
+
+## Phase 4 — Reconnaissance
+- Subdomain Enumeration
+- Directory Bruteforcing
+- Google Dorking
+- Information Gathering
+- Technology Fingerprinting
+
+### Tools
+- Nmap
+- Subfinder
+- Amass
+- WhatWeb
+- Wappalyzer
+- Burp Suite
+- ffuf
+- dirsearch
+
+## Phase 5 — Vulnerability Hunting
+- XSS
+- SQL Injection
+- IDOR
+- SSRF
+- CSRF
+- File Upload Vulnerabilities
+- Authentication Bypass
+- Command Injection
+
+## Phase 6 — Automation & Scripting
+- Python Basics
+- Bash Scripting
+- Automation for Recon
+- API Interaction
+
+## Phase 7 — Real Practice
+- PortSwigger Web Security Academy
+- TryHackMe
+- Hack The Box
+- CTF Challenges
+- Bug Bounty Platforms
 
 ---
 
-## 📂 Project Highlights
+# 🌐 Recommended Platforms
 
-### 🔐 Cyber Security
-
-* Port Scanner
-* Password Strength Checker
-* Malware Detection (AI-based)
-
-### 🤖 AI & API Development
-
-* FastAPI Projects
-* AI Chatbot API
-* Machine Learning API
+- HackerOne
+- Bugcrowd
+- Intigriti
+- Synack
+- YesWeHack
 
 ---
 
-## 📊 Learning Philosophy
+# 📚 Learning Resources
 
-> “Don’t just watch tutorials — build, break, fix, and repeat.”
+## Free Resources
+- PortSwigger Academy
+- OWASP Web Security Testing Guide
+- TryHackMe Free Rooms
+- YouTube Cybersecurity Channels
 
----
-
-## 📈 Progress Tracker
-
-* ✅ Cyber Security Basics
-* ✅ Linux Fundamentals
-* 🔄 FastAPI Advanced
-* 🔄 AI Model Integration
-* ⏳ Cloud & DevOps
-
----
-
-## 🌐 Connect With Me
-
-* GitHub: https://github.com/Goraya0999
-* LinkedIn: 
+## Documentation
+- OWASP
+- MDN Web Docs
+- HackTricks
 
 ---
 
-⭐ If you like this repo, give it a star!
+# 🧪 Practice Workflow
+
+1. Reconnaissance
+2. Identify attack surface
+3. Test manually
+4. Use automation carefully
+5. Validate vulnerability
+6. Write professional report
+
+---
+
+# 📝 Notes
+
+- Always hack legally
+- Read program scope carefully
+- Avoid destructive testing
+- Focus on learning consistency
+- Document everything
+
+---
+
+# 🎯 Long-Term Goals
+
+- Build strong web security knowledge
+- Earn bug bounty rewards
+- Learn advanced exploitation
+- Transition into penetration testing or cybersecurity roles
+
+---
+
+# 🚀 Progress Tracking
+
+- [ ] Linux Basics
+- [ ] Networking
+- [ ] Web Fundamentals
+- [ ] OWASP Top 10
+- [ ] Burp Suite
+- [ ] Recon Automation
+- [ ] Vulnerability Hunting
+- [ ] Report Writing
+- [ ] First Valid Bug
+- [ ] First Bounty Reward
+
+---
+
+# ⚠️ Disclaimer
+
+This repository is for educational and ethical purposes only.  
+Do not test systems without proper authorization.
