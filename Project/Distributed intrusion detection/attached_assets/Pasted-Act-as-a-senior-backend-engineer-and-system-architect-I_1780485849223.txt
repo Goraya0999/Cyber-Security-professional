@@ -1,0 +1,113 @@
+Act as a senior backend engineer and system architect.
+
+I want to build a scalable backend API for a cybersecurity project called "Distributed Intrusion Detection System (DIDS)".
+
+Tech Stack:
+
+* FastAPI (Python)
+* PostgreSQL (database)
+* SQLAlchemy or SQLModel (ORM)
+* Pydantic (data validation)
+* Uvicorn (server)
+
+Requirements:
+
+1. System Design:
+
+* Design a modular, production-ready backend architecture
+* Use layered structure:
+
+  * routes/
+  * services/
+  * models/
+  * schemas/
+  * database/
+  * core/ (config, security, utils)
+
+2. Core Features:
+
+* API to receive network traffic data:
+
+  * POST /scan
+  * Input: raw or structured request data
+  * Output: prediction (Benign / Malicious)
+
+* Logs Management:
+
+  * Store all requests in PostgreSQL
+  * Fields: id, data, prediction, confidence_score, timestamp
+
+* Alerts System:
+
+  * If malicious detected → store in alerts table
+  * Provide endpoint:
+
+    * GET /alerts
+
+* Logs API:
+
+  * GET /logs
+  * Pagination support
+  * Filtering (by type, date, status)
+
+3. Database Design:
+
+* PostgreSQL schema:
+
+  * logs table
+  * alerts table
+* Use proper indexing for performance
+* Use migrations (Alembic)
+
+4. AI/Detection Logic:
+
+* Simulate or integrate ML model
+* Create service layer:
+
+  * detection_service.py
+* Return:
+
+  * prediction
+  * confidence score
+
+5. API Best Practices:
+
+* Use async endpoints
+* Proper status codes
+* Input validation with Pydantic
+* Centralized error handling
+
+6. Security:
+
+* Add basic API key authentication or JWT
+* Prevent abuse (rate limiting optional)
+
+7. Performance:
+
+* Use connection pooling
+* Optimize queries
+* Background tasks (optional for heavy processing)
+
+8. Code Quality:
+
+* Clean, readable, production-style code
+* Proper separation of concerns
+* Add comments and docstrings
+
+9. Bonus Features:
+
+* Add real-time support (WebSockets optional)
+* Add health check endpoint (/health)
+* Dockerize the backend
+
+Output Format:
+
+* Project folder structure
+* Database schema design
+* Step-by-step explanation
+* Full FastAPI code
+* PostgreSQL integration
+* Sample requests (Postman/cURL)
+* Run instructions
+
+Make it production-ready and suitable for a portfolio + freelance project.

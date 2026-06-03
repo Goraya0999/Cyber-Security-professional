@@ -1,0 +1,984 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.2.0
+  description: DIDS - Distributed Intrusion Detection System API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: scan
+    description: Traffic scanning and detection
+  - name: logs
+    description: Network traffic log operations
+  - name: alerts
+    description: Threat alert operations
+  - name: analytics
+    description: Analytics and statistics operations
+  - name: summary
+    description: Dashboard summary operations
+security:
+  - BearerAuth: []
+paths:
+  /auth/signup:
+    post:
+      operationId: signup
+      tags: [auth]
+      summary: Register a new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupInput"
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthToken"
+        "409":
+          description: Email or username already exists
+        "422":
+          description: Validation error
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login with email and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthToken"
+        "401":
+          description: Invalid credentials
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current authenticated user
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Unauthorized
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status and version info
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /scan:
+    post:
+      operationId: scanTraffic
+      tags: [scan]
+      summary: Scan network traffic for threats
+      description: >
+        Submits raw or structured network traffic data to the detection engine.
+        The engine classifies the traffic as Benign or Malicious and returns a
+        confidence score. If malicious, an alert is automatically created.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScanInput"
+      responses:
+        "200":
+          description: Scan result with prediction and confidence
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanResult"
+        "400":
+          description: Invalid input
+
+  /scan/packet:
+    post:
+      operationId: scanPacket
+      tags: [scan]
+      summary: Ingest captured packet data for threat detection
+      description: >
+        Accepts packet metadata or tcpdump-style packet text from a distributed
+        sensor node. The API normalizes the packet into the standard scan
+        payload, runs the ML/fallback detection workflow, stores the resulting
+        network log, and auto-creates an alert when malicious.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PacketScanInput"
+      responses:
+        "200":
+          description: Scan result with prediction and confidence
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanResult"
+        "400":
+          description: Invalid packet input
+
+  /network-analysis:
+    get:
+      operationId: listNetworkAnalyses
+      tags: [analytics]
+      summary: List recent network traffic analysis reports
+      responses:
+        "200":
+          description: Recent analysis report summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NetworkAnalysisSummary"
+
+  /network-analysis/upload:
+    post:
+      operationId: uploadNetworkAnalysisFile
+      tags: [analytics]
+      summary: Upload a network capture or network log for threat analysis
+      description: >
+        Accepts raw binary upload bodies for .pcap, .pcapng, .cap, Wireshark
+        captures, network logs, IDS/IPS logs, and firewall logs. The original
+        filename is supplied through the X-File-Name header.
+      parameters:
+        - name: X-File-Name
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "201":
+          description: Analysis report generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NetworkAnalysisReport"
+        "400":
+          description: Invalid or unsupported upload
+
+  /network-analysis/{id}:
+    get:
+      operationId: getNetworkAnalysis
+      tags: [analytics]
+      summary: Get a network traffic analysis report
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Full analysis report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NetworkAnalysisReport"
+        "404":
+          description: Analysis report not found
+
+  /network-analysis/{id}/export/{format}:
+    get:
+      operationId: exportNetworkAnalysis
+      tags: [analytics]
+      summary: Export a network analysis report
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [pdf, docx, json]
+      responses:
+        "200":
+          description: Exported report file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NetworkAnalysisReport"
+
+  /logs:
+    get:
+      operationId: getLogs
+      tags: [logs]
+      summary: Get network traffic logs
+      description: Returns paginated list of network logs with optional filters
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [benign, malicious, all]
+            default: all
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogsPage"
+
+  /logs/recent:
+    get:
+      operationId: getRecentLogs
+      tags: [logs]
+      summary: Get most recent logs
+      description: Returns the most recent N logs for live feed display
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Recent logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NetworkLog"
+
+  /alerts:
+    get:
+      operationId: getAlerts
+      tags: [alerts]
+      summary: Get threat alerts
+      description: Returns list of detected threat alerts
+      parameters:
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [low, medium, high, critical, all]
+            default: all
+        - name: resolved
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Alert"
+
+  /alerts/{id}/resolve:
+    patch:
+      operationId: resolveAlert
+      tags: [alerts]
+      summary: Mark alert as resolved
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Alert resolved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Alert"
+        "404":
+          description: Alert not found
+
+  /summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [summary]
+      summary: Get dashboard summary stats
+      description: Returns total traffic, threats detected, safe requests, and system status
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /analytics/traffic:
+    get:
+      operationId: getTrafficAnalytics
+      tags: [analytics]
+      summary: Get traffic breakdown over time
+      description: Returns time-series data of benign vs malicious traffic
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [hour, day, week, month]
+            default: day
+      responses:
+        "200":
+          description: Traffic analytics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrafficPoint"
+
+  /analytics/threats:
+    get:
+      operationId: getThreatBreakdown
+      tags: [analytics]
+      summary: Get threat type breakdown
+      description: Returns distribution of threat types
+      responses:
+        "200":
+          description: Threat breakdown
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ThreatCategory"
+
+  /analytics/nodes:
+    get:
+      operationId: getNodeActivity
+      tags: [analytics]
+      summary: Get per-node activity stats
+      description: Returns activity breakdown per detection node
+      responses:
+        "200":
+          description: Node activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NodeStat"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    SignupInput:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+      required:
+        - username
+        - email
+        - password
+
+    LoginInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    AuthToken:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT access token
+        user:
+          $ref: "#/components/schemas/UserProfile"
+      required:
+        - token
+        - user
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - username
+        - email
+        - createdAt
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+        version:
+          type: string
+        uptime:
+          type: number
+      required:
+        - status
+
+    ScanInput:
+      type: object
+      description: Network traffic data submitted for threat detection
+      properties:
+        sourceIp:
+          type: string
+          description: Source IP address of the traffic
+        destinationIp:
+          type: string
+          description: Destination IP address
+        protocol:
+          type: string
+          description: Network protocol (TCP, UDP, HTTP, etc.)
+        data:
+          type: string
+          description: Raw payload or description of the traffic
+        nodeId:
+          type: string
+          description: ID of the detection node that captured the traffic
+        bytesSent:
+          type: integer
+          description: Number of bytes in the payload
+      required:
+        - sourceIp
+        - destinationIp
+        - protocol
+        - data
+        - nodeId
+
+    PacketScanInput:
+      type: object
+      description: Captured packet data submitted by a distributed sensor node
+      properties:
+        nodeId:
+          type: string
+          description: Optional node ID override for raw packet text
+        rawPacket:
+          type: string
+          description: tcpdump-style packet line, for example "IP 45.33.32.156.44321 > 10.0.0.5.80: Flags [S], length 99000"
+        packet:
+          type: object
+          description: Structured packet metadata captured by a sensor
+          properties:
+            sourceIp:
+              type: string
+            destinationIp:
+              type: string
+            protocol:
+              type: string
+            nodeId:
+              type: string
+            payload:
+              type: string
+            bytesSent:
+              type: integer
+              minimum: 0
+            sourcePort:
+              type: integer
+              minimum: 0
+              maximum: 65535
+            destinationPort:
+              type: integer
+              minimum: 0
+              maximum: 65535
+            flags:
+              type: array
+              items:
+                type: string
+          required:
+            - sourceIp
+            - destinationIp
+            - protocol
+            - nodeId
+      anyOf:
+        - required: [rawPacket]
+        - required: [packet]
+
+    NetworkAnalysisSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        fileName:
+          type: string
+        fileSize:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        packetCount:
+          type: integer
+        riskLevel:
+          type: string
+          enum: [Safe, Low Risk, Medium Risk, High Risk, Critical]
+        riskScore:
+          type: integer
+        threatCount:
+          type: integer
+      required:
+        - id
+        - fileName
+        - fileSize
+        - createdAt
+        - packetCount
+        - riskLevel
+        - riskScore
+        - threatCount
+
+    NetworkAnalysisReport:
+      type: object
+      description: Network capture/log analysis result with AI-style security narrative
+      properties:
+        id:
+          type: string
+        fileName:
+          type: string
+        fileType:
+          type: string
+        fileSize:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        packetCount:
+          type: integer
+        totalBytes:
+          type: integer
+        uniqueSourceIps:
+          type: integer
+        uniqueDestinationIps:
+          type: integer
+        riskLevel:
+          type: string
+          enum: [Safe, Low Risk, Medium Risk, High Risk, Critical]
+        riskScore:
+          type: integer
+        protocols:
+          type: array
+          items:
+            type: object
+            properties:
+              protocol:
+                type: string
+              packets:
+                type: integer
+              bytes:
+                type: integer
+        topSourceIps:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrafficEndpoint"
+        topDestinationIps:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrafficEndpoint"
+        topPorts:
+          type: array
+          items:
+            type: object
+            properties:
+              port:
+                type: integer
+              count:
+                type: integer
+        dnsRequests:
+          type: array
+          items:
+            type: object
+            properties:
+              sourceIp:
+                type: string
+              domain:
+                type: string
+              count:
+                type: integer
+        httpActivity:
+          type: array
+          items:
+            type: object
+            properties:
+              sourceIp:
+                type: string
+              destinationIp:
+                type: string
+              host:
+                type: string
+              method:
+                type: string
+              path:
+                type: string
+              count:
+                type: integer
+        timeline:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              packets:
+                type: integer
+              bytes:
+                type: integer
+        threats:
+          type: array
+          items:
+            $ref: "#/components/schemas/ThreatFinding"
+        aiReport:
+          type: object
+          properties:
+            summary:
+              type: string
+            suspiciousReasons:
+              type: array
+              items:
+                type: string
+            possibleThreats:
+              type: array
+              items:
+                type: string
+            recommendedMitigations:
+              type: array
+              items:
+                type: string
+            confidenceScore:
+              type: number
+        securityRecommendations:
+          type: object
+          properties:
+            firewall:
+              type: array
+              items:
+                type: string
+            idsIps:
+              type: array
+              items:
+                type: string
+            hardening:
+              type: array
+              items:
+                type: string
+
+    TrafficEndpoint:
+      type: object
+      properties:
+        ip:
+          type: string
+        count:
+          type: integer
+        bytes:
+          type: integer
+
+    ThreatFinding:
+      type: object
+      properties:
+        type:
+          type: string
+        severity:
+          type: string
+          enum: [Safe, Low Risk, Medium Risk, High Risk, Critical]
+        confidence:
+          type: number
+        description:
+          type: string
+        indicators:
+          type: array
+          items:
+            type: string
+        mitigation:
+          type: string
+
+    ScanResult:
+      type: object
+      description: Detection result from the ML engine
+      properties:
+        logId:
+          type: integer
+          description: ID of the stored log entry
+        prediction:
+          type: string
+          enum: [benign, malicious]
+          description: Classification result
+        confidenceScore:
+          type: number
+          description: Model confidence 0.0–1.0
+        threatType:
+          type: ["string", "null"]
+          description: Specific threat category if malicious
+        alertId:
+          type: ["integer", "null"]
+          description: ID of auto-created alert if malicious
+        message:
+          type: string
+      required:
+        - logId
+        - prediction
+        - confidenceScore
+        - threatType
+        - alertId
+        - message
+
+    NetworkLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        sourceIp:
+          type: string
+        destinationIp:
+          type: string
+        protocol:
+          type: string
+        data:
+          type: string
+        status:
+          type: string
+          enum: [benign, malicious]
+        nodeId:
+          type: string
+        bytesSent:
+          type: integer
+        confidenceScore:
+          type: number
+          description: ML model confidence 0.0–1.0
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - id
+        - sourceIp
+        - destinationIp
+        - protocol
+        - data
+        - status
+        - nodeId
+        - bytesSent
+        - confidenceScore
+        - timestamp
+
+    LogsPage:
+      type: object
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: "#/components/schemas/NetworkLog"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+      required:
+        - logs
+        - total
+        - page
+        - pageSize
+
+    Alert:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        sourceIp:
+          type: string
+        nodeId:
+          type: string
+        resolved:
+          type: boolean
+        logId:
+          type: ["integer", "null"]
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - description
+        - severity
+        - sourceIp
+        - nodeId
+        - resolved
+        - logId
+        - timestamp
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalTraffic:
+          type: integer
+        threatsDetected:
+          type: integer
+        safeRequests:
+          type: integer
+        activeNodes:
+          type: integer
+        systemStatus:
+          type: string
+          enum: [operational, degraded, critical]
+        threatRate:
+          type: number
+        trafficTrend:
+          type: number
+        unresolvedAlerts:
+          type: integer
+      required:
+        - totalTraffic
+        - threatsDetected
+        - safeRequests
+        - activeNodes
+        - systemStatus
+        - threatRate
+        - trafficTrend
+        - unresolvedAlerts
+
+    TrafficPoint:
+      type: object
+      properties:
+        label:
+          type: string
+        benign:
+          type: integer
+        malicious:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - label
+        - benign
+        - malicious
+        - timestamp
+
+    ThreatCategory:
+      type: object
+      properties:
+        name:
+          type: string
+        count:
+          type: integer
+        percentage:
+          type: number
+      required:
+        - name
+        - count
+        - percentage
+
+    NodeStat:
+      type: object
+      properties:
+        nodeId:
+          type: string
+        location:
+          type: string
+        totalRequests:
+          type: integer
+        threats:
+          type: integer
+        status:
+          type: string
+          enum: [online, offline, degraded]
+      required:
+        - nodeId
+        - location
+        - totalRequests
+        - threats
+        - status

@@ -21,3 +21,4 @@ Thumbs.db
 # Secrets
 .env
 *.key
+Project/Distributed intrusion detection/artifacts/ml-api/ml/cicids_dataset.csv
